@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+        <div class="container">
+        <h1>Login</h1>
+        <div class="p-2 row">
+            <div class="col-3"></div>
+            <div class="col-6">
+                {% if form %}
+                <div>
+                    <p>Please complete the following form to login.
+                    </p>
+                </div>
+                <form method="POST">
+                    <div class="text-left p-2 bg-light border border-primary">
+                        <div style="text-align: left">
+                            {{ form.csrf_token() }}
+                            <div>
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                {% for category, message in messages %}
+
+                                <div class="alert alert-{{ category }} mt-3 alert-dismissible" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" onclick=delete_flash(this)>
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+                                {% endfor %}
+                                {% endwith %}
+                            </div>
+                            <div class="form-group">
+                                {{ form.email.label}}<span class="text-danger">*</span>
+                                {{ form.email(class="form-control") }}
+                                {{ form.password.label}}<span class="text-danger">*</span>
+                                {{ form.password(class="form-control") }}
+                                {% for error in form.password.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div>
+                            {{ form.submit(class="btn btn-success") }}
+                        </div>
+                    </div>
+                </form>
+                {% else %}
+                <div class="alert alert-{{ 'danger' }} mt-3 alert-dismissible" role="alert">
+                    {{ 'Number of incorrect login attempts exceeded, click' }} <a href="{{ url_for('accounts.unlock') }}">here</a> to unlock account.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" onclick=delete_flash(this)>
+                        <span>&times;</span>
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
