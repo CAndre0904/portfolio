@@ -84,7 +84,7 @@ class User(db.Model, UserMixin):
         self.lastname = lastname
         self.phone = phone
         self.password = password
-        self.role = "end_user"
+        self.role = "db_admin"
         self.salt = base64.b64encode(secrets.token_bytes(32)).decode()
 
     # Declaring a method to verify the hashed password
@@ -100,6 +100,43 @@ class User(db.Model, UserMixin):
     @login_manager.user_loader
     def load_user(id):
         return User.query.get(int(id))
+
+# DATABASE ADMINISTRATOR
+class MainIndexLink(MenuLink):
+    def get_url(self):
+        return url_for('index')
+
+class UserView(ModelView):
+    column_display_pk = True
+    column_hide_backrefs = False
+    column_list = ('id','email','password','firstname','lastname','phone','role')
+
+    # Only db admins can access the posts table
+    def is_accessible(self):
+        return True
+        if current_user.is_authenticated:
+            return current_user.role == 'db_admin'
+        return False
+
+    def inaccessible_callback(self, name, **kwargs):
+        # If the user is anonymous then they should be redirected back to the login page
+        if current_user.is_anonymous:
+            flash('Admin access is required for this page.', category="danger")
+            return redirect(url_for('accounts.login'))
+        # If the user is authenticated then they should be redirected to the forbidden error page
+        else:
+            return render_template('errors/forbidden_error.html')
+
+admin = Admin(app, name='DB Admin', template_mode='bootstrap4')
+admin._menu = admin._menu[1:]
+admin.add_link(MainIndexLink(name='Home Page'))
+admin.add_view(UserView(User, db.session))
+app.config['FLASK_ADMIN_FLUID_LAYOUT'] = bool(os.getenv('FLASK_ADMIN_FLUID_LAYOUT'))
+
+
+
+
+
 
 
 # IMPORT BLUEPRINTS
