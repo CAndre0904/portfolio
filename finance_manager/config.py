@@ -111,7 +111,7 @@ class UserView(ModelView):
     column_hide_backrefs = False
     column_list = ('id','email','password','firstname','lastname','phone','role')
 
-    # Only db admins can access the posts table
+    # Only db admins can access the users table
     def is_accessible(self):
         return True
         if current_user.is_authenticated:
@@ -123,9 +123,6 @@ class UserView(ModelView):
         if current_user.is_anonymous:
             flash('Admin access is required for this page.', category="danger")
             return redirect(url_for('accounts.login'))
-        # If the user is authenticated then they should be redirected to the forbidden error page
-        else:
-            return render_template('errors/forbidden_error.html')
 
 admin = Admin(app, name='DB Admin', template_mode='bootstrap4')
 admin._menu = admin._menu[1:]
