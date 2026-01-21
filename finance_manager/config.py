@@ -64,20 +64,26 @@ class Expense(db.Model):
     created = db.Column(db.DateTime, nullable=False)
     title = db.Column(db.Text, nullable=False)
     amount = db.Column(db.Float, nullable=False)
+    start_date = db.Column(db.Date, nullable=False)
+    end_date = db.Column(db.Date, nullable=True)
     user = db.relationship("User", back_populates="expenses")
 
     # Declaring the constructor
-    def __init__(self, userid, title, amount):
+    def __init__(self, userid, title, amount, start_date, end_date):
         self.userid = userid
         self.created = datetime.now()
         self.title = title
         self.amount = amount
+        self.start_date = start_date
+        self.end_date = end_date
 
     # Declaring a method to update an expense
-    def update(self, title, amount):
+    def update(self, title, amount, due_date, end_date):
         self.created = datetime.now()
         self.title = title
         self.amount = amount
+        self.start_date = due_date
+        self.end_date = end_date
         db.session.commit()
 
 class User(db.Model, UserMixin):
@@ -156,7 +162,7 @@ class UserView(ModelView):
 class ExpenseView(ModelView):
     column_display_pk = True
     column_hide_backrefs = False
-    column_list = ('id','userid','created','title','amount','user')
+    column_list = ('id','userid','created','title','amount','due date','user')
 
     # Only db admins can access the users table
     def is_accessible(self):
@@ -189,7 +195,9 @@ app.config['FLASK_ADMIN_FLUID_LAYOUT'] = bool(os.getenv('FLASK_ADMIN_FLUID_LAYOU
 
 # IMPORT BLUEPRINTS
 from finance_manager.accounts.views import accounts_bp, ph
+from finance_manager.expenses.views import expenses_bp
 
 # REGISTER BLUEPRINTS
 app.register_blueprint(accounts_bp)
+app.register_blueprint(expenses_bp)
 
