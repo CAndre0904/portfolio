@@ -54,6 +54,32 @@ db = SQLAlchemy(app, metadata=metadata)
 migrate = Migrate(app, db)
 
 # Database tables
+
+
+class Expense(db.Model):
+    __tablename__ = 'expenses'
+    # Declaring the fields for the expenses table
+    id = db.Column(db.Integer, primary_key=True)
+    userid = db.Column(db.Integer, db.ForeignKey('users.id'))
+    created = db.Column(db.DateTime, nullable=False)
+    title = db.Column(db.Text, nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    user = db.relationship("User", back_populates="expenses")
+
+    # Declaring the constructor
+    def __init__(self, userid, title, amount):
+        self.userid = userid
+        self.created = datetime.now()
+        self.title = title
+        self.amount = amount
+
+    # Declaring a method to update an expense
+    def update(self, title, amount):
+        self.created = datetime.now()
+        self.title = title
+        self.amount = amount
+        db.session.commit()
+
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
 
@@ -76,6 +102,8 @@ class User(db.Model, UserMixin):
 
     # Login manager properties
     active = db.Column(db.Boolean, nullable=False, default=True)
+
+    expenses = db.relationship("Expense", order_by=Expense.id, back_populates="user")
 
     # Declaring a constructor
     def __init__(self, email, firstname, lastname, phone, password):
@@ -124,10 +152,33 @@ class UserView(ModelView):
             flash('Admin access is required for this page.', category="danger")
             return redirect(url_for('accounts.login'))
 
+
+class ExpenseView(ModelView):
+    column_display_pk = True
+    column_hide_backrefs = False
+    column_list = ('id','userid','created','title','amount','user')
+
+    # Only db admins can access the users table
+    def is_accessible(self):
+        return True
+        if current_user.is_authenticated:
+            return current_user.role == 'db_admin'
+        return False
+
+    def inaccessible_callback(self, name, **kwargs):
+        # If the user is anonymous then they should be redirected back to the login page
+        if current_user.is_anonymous:
+            flash('Admin access is required for this page.', category="danger")
+            return redirect(url_for('accounts.login'))
+
+
+
+
 admin = Admin(app, name='DB Admin', template_mode='bootstrap4')
 admin._menu = admin._menu[1:]
 admin.add_link(MainIndexLink(name='Home Page'))
 admin.add_view(UserView(User, db.session))
+admin.add_view(ExpenseView(Expense, db.session))
 app.config['FLASK_ADMIN_FLUID_LAYOUT'] = bool(os.getenv('FLASK_ADMIN_FLUID_LAYOUT'))
 
 
