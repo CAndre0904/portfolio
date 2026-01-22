@@ -162,7 +162,7 @@ class UserView(ModelView):
 class ExpenseView(ModelView):
     column_display_pk = True
     column_hide_backrefs = False
-    column_list = ('id','userid','created','title','amount','due date','user')
+    column_list = ('id','userid','created','title','amount','start_date', 'end_date','user')
 
     # Only db admins can access the users table
     def is_accessible(self):

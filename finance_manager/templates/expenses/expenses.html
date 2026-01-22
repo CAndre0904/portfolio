@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container">
+    <h1>Expenses</h1>
+    <div class="p-2 row">
+        <div class="col-2"></div>
+        <div class="col-8">
+            <a class="nav-item nav-link" href="{{ url_for('expenses.create') }}">Add Expense</a>
+            <div class="text-left p-2 bg-light border border-primary" style="text-align: left">
+                <div>
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% for category, message in messages %}
+                            <div style="text-align: left" class="alert alert-{{ category }} mt-3 alert-dismissable" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" onclick=delete_flash(this)>
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endwith %}
+                </div>
+
+                {% for expense in expenses %}
+                <div class="card border border-dark">
+                     <div class="card-header bg-dark text-white border border-dark">
+                         <h4>{{ decrypt_title(expense) }}</h4>
+                         <h5></h5>
+                         <small>{{ expense.created.strftime('%H:%M:%S %d-%m-%Y') }}</small>
+                     </div>
+                     <div class="card-body">Started on: {{ expense.start_date.strftime('%d-%m-%Y') }}</div>
+                    <div class="card-body">Will end on: {{ expense.end_date.strftime('%d-%m-%Y') }}</div>
+                </div>
+                <br>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-2"></div>
+    </div>
+    </div>
+{% endblock %}

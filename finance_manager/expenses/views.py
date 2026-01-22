@@ -9,6 +9,26 @@ import base64
 
 expenses_bp = Blueprint('expenses', __name__, template_folder='templates')
 
+
+@expenses_bp.route('/expenses')
+@login_required
+def expenses():
+
+    # Methods for decrypting must be declared to pass onto the HTML as an expense cannot be decrypted until its author has been found
+    def decrypt_title(expense):
+        key = scrypt(password=str(expense.user.password).encode(), salt=str(expense.user.salt).encode(), n=2048, r=8, p=1, dklen=32)
+        encoded_key = base64.b64encode(key)
+        cipher = Fernet(encoded_key)
+        return (cipher.decrypt(expense.title)).decode()
+
+    # Retrieving all the posts
+    all_expenses = Expense.query.order_by(desc('id')).all()
+    # Rendering the expenses page and passing the methods through
+    return render_template('expenses/expenses.html', expenses=all_expenses, decrypt_title=decrypt_title)
+
+
+
+
 @expenses_bp.route('/create', methods=('GET', 'POST'))
 @login_required
 def create():
@@ -27,5 +47,5 @@ def create():
         db.session.add(new_expense)
         db.session.commit()
         flash('Expense created', category='success')
-        return redirect(url_for('index'))
+        return redirect(url_for('expenses.expenses'))
     return render_template('expenses/create.html', form=form)
