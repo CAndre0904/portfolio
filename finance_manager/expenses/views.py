@@ -9,6 +9,20 @@ import base64
 
 expenses_bp = Blueprint('expenses', __name__, template_folder='templates')
 
+months = {
+            'January': 1,
+            'February': 2,
+            'March': 3,
+            'April': 4,
+            'May': 5,
+            'June': 6,
+            'July': 7,
+            'August': 8,
+            'September': 9,
+            'October': 10,
+            'November': 11,
+            'December': 12
+        }
 
 @expenses_bp.route('/expenses')
 @login_required
@@ -41,11 +55,46 @@ def create():
         cipher = Fernet(encoded_key)
         title_bs = form.title.data.encode()
         encrypted_title = cipher.encrypt(title_bs)
+
+        months = {
+            'January': 1,
+            'February': 2,
+            'March': 3,
+            'April': 4,
+            'May': 5,
+            'June': 6,
+            'July': 7,
+            'August': 8,
+            'September': 9,
+            'October': 10,
+            'November': 11,
+            'December': 12
+        }
+
+
+
         # Declaring the expense
-        new_expense = Expense(userid=current_user.get_id(), title=encrypted_title, amount=form.amount.data, start_date=form.start_date.data, end_date=form.end_date.data)
+        new_expense = Expense(userid=current_user.get_id(), title=encrypted_title,
+                              amount=form.amount.data, payment_day=form.payment_day.data,
+                              start_month=form.start_month.data, start_year=form.start_year.data,
+                              last_month=form.last_month.data, last_year=form.last_year.data)
         # Adding the expense to the database
         db.session.add(new_expense)
         db.session.commit()
         flash('Expense created', category='success')
         return redirect(url_for('expenses.expenses'))
     return render_template('expenses/create.html', form=form)
+
+
+@expenses_bp.route('/<int:id>/delete')
+@login_required
+def delete(id):
+    # Only the author can delete the expense
+    if current_user.id != (Expense.query.filter_by(id=id).first()).userid:
+        flash('You do not have authorisation to delete this expense.', category="primary")
+        return redirect(url_for('expenses.expenses'))
+    # Deleting the expense
+    Expense.query.filter_by(id=id).delete()
+    db.session.commit()
+    flash('Expense deleted', category='success')
+    return redirect(url_for('expenses.expenses'))

@@ -64,26 +64,35 @@ class Expense(db.Model):
     created = db.Column(db.DateTime, nullable=False)
     title = db.Column(db.Text, nullable=False)
     amount = db.Column(db.Float, nullable=False)
-    start_date = db.Column(db.Date, nullable=False)
-    end_date = db.Column(db.Date, nullable=True)
+    payment_day = db.Column(db.Integer, nullable=False)
+    start_month = db.Column(db.Integer, nullable=False)
+    start_year = db.Column(db.Integer, nullable=False)
+    last_month = db.Column(db.Integer, nullable=True)
+    last_year = db.Column(db.Integer, nullable=True)
     user = db.relationship("User", back_populates="expenses")
 
     # Declaring the constructor
-    def __init__(self, userid, title, amount, start_date, end_date):
+    def __init__(self, userid, title, amount, payment_day, start_month, start_year, last_month, last_year):
         self.userid = userid
         self.created = datetime.now()
         self.title = title
         self.amount = amount
-        self.start_date = start_date
-        self.end_date = end_date
+        self.payment_day = payment_day
+        self.start_month = start_month
+        self.start_year = start_year
+        self.last_month = last_month
+        self.last_year = last_year
 
     # Declaring a method to update an expense
-    def update(self, title, amount, due_date, end_date):
+    def update(self, userid, title, amount, payment_day, start_month, start_year, last_month, last_year):
         self.created = datetime.now()
         self.title = title
         self.amount = amount
-        self.start_date = due_date
-        self.end_date = end_date
+        self.payment_day = payment_day
+        self.start_month = start_month
+        self.start_year = start_year
+        self.last_month = last_month
+        self.last_year = last_year
         db.session.commit()
 
 class User(db.Model, UserMixin):
@@ -162,7 +171,7 @@ class UserView(ModelView):
 class ExpenseView(ModelView):
     column_display_pk = True
     column_hide_backrefs = False
-    column_list = ('id','userid','created','title','amount','start_date', 'end_date','user')
+    column_list = ('id','userid','created','title','amount', 'payment_day','start_month', 'start_year', 'last_month', 'last_year', 'user')
 
     # Only db admins can access the users table
     def is_accessible(self):
