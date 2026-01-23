@@ -41,8 +41,6 @@ def expenses():
     return render_template('expenses/expenses.html', expenses=all_expenses, decrypt_title=decrypt_title)
 
 
-
-
 @expenses_bp.route('/create', methods=('GET', 'POST'))
 @login_required
 def create():
@@ -85,6 +83,45 @@ def create():
         return redirect(url_for('expenses.expenses'))
     return render_template('expenses/create.html', form=form)
 
+@expenses_bp.route('/<int:id>/update', methods=('GET', 'POST'))
+@login_required
+def update(id):
+    # Only the author can update the expense
+    if current_user.id != (Expense.query.filter_by(id=id).first()).userid:
+        flash('You do not have authorisation to update this expense.', category="primary")
+        return redirect(url_for('index'))
+    # Finding the expense
+    expense_to_update = Expense.query.filter_by(id=id).first()
+    if not expense_to_update:
+        return redirect(url_for('index'))
+    form = ExpenseForm()
+    # Declaring the key for encrypting the updated expense
+    key = scrypt(password=str(current_user.password).encode(), salt=str(current_user.salt).encode(), n=2048, r=8, p=1, dklen=32)
+    encoded_key = base64.b64encode(key)
+    cipher = Fernet(encoded_key)
+    if form.validate_on_submit():
+        # Encrypting the updated data
+        title_bs = form.title.data.encode()
+        encrypted_title = cipher.encrypt(title_bs)
+        # Updating the expense
+        expense_to_update.update(title=encrypted_title,
+                              amount=form.amount.data, payment_day=form.payment_day.data,
+                              start_month=form.start_month.data, start_year=form.start_year.data,
+                              last_month=form.last_month.data, last_year=form.last_year.data)
+        flash('Expense updated', category='success')
+        return redirect(url_for('expenses.expenses'))
+    # Decoding the data to be viewed
+    # Setting the form's fields to be the already existing data
+    form.title.data = (cipher.decrypt(expense_to_update.title)).decode()
+    form.amount.data = expense_to_update.amount
+    form.payment_day.data = expense_to_update.payment_day
+    form.start_month.data = expense_to_update.start_month
+    form.start_year.data = expense_to_update.start_year
+    form.last_month.data = expense_to_update.last_month
+    form.last_year.data = expense_to_update.last_year
+
+
+    return render_template('expenses/update.html', form=form)
 
 @expenses_bp.route('/<int:id>/delete')
 @login_required

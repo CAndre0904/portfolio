@@ -84,8 +84,7 @@ class Expense(db.Model):
         self.last_year = last_year
 
     # Declaring a method to update an expense
-    def update(self, userid, title, amount, payment_day, start_month, start_year, last_month, last_year):
-        self.created = datetime.now()
+    def update(self, title, amount, payment_day, start_month, start_year, last_month, last_year):
         self.title = title
         self.amount = amount
         self.payment_day = payment_day

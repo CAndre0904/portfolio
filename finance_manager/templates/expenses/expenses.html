@@ -32,7 +32,7 @@
                     <div class="card-body">Will end on: {{ expense.payment_day }}/{{ expense.last_month }}/{{ expense.last_year }}</div>
                     <div class="card-footer">
                     {% if current_user.id==expense.userid %}
-
+                        <a class="navbar-item" href="{{ url_for('expenses.update', id=expense.id) }}">Update</a>
                         <a class="navbar-item" href="{{ url_for('expenses.delete', id=expense.id) }}">Delete</a>
                     {% endif %}
                      </div>
