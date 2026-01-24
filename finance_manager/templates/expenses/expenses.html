@@ -6,6 +6,7 @@
     <div class="p-2 row">
         <div class="col-2"></div>
         <div class="col-8">
+            <h5>Total expenses this month: £{{ monthly_total }}</h5>
             <a class="nav-item nav-link" href="{{ url_for('expenses.create') }}">Add Expense</a>
             <div class="text-left p-2 bg-light border border-primary" style="text-align: left">
                 <div>

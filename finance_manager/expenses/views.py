@@ -37,8 +37,14 @@ def expenses():
 
     # Retrieving all the posts
     all_expenses = Expense.query.order_by(desc('id')).all()
+
+    # Calculating the total expenses for this month
+    total = 0
+    for expense in all_expenses:
+        total = total + expense.amount
+
     # Rendering the expenses page and passing the methods through
-    return render_template('expenses/expenses.html', expenses=all_expenses, decrypt_title=decrypt_title)
+    return render_template('expenses/expenses.html', expenses=all_expenses, decrypt_title=decrypt_title, monthly_total = total)
 
 
 @expenses_bp.route('/create', methods=('GET', 'POST'))
