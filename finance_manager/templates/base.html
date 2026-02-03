@@ -6,18 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Finance Manager</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
-<style>
-    .table {
-        margin-left: auto;
-        margin-right: auto;
-    }
-</style>
+
 
 <section class="container-fluid p-3 my-3">
-    <nav class="nav nav-pills flex-column flex-sm-row">
+    <nav class="taskbar">
         <a class="nav-item nav-link" href="{{ url_for('index') }}">Home</a>
         {% if current_user.is_anonymous %}
             <a class="nav-item nav-link" href="{{ url_for('accounts.registration') }}">Registration</a>
@@ -30,6 +26,7 @@
             <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
         {% endif %}
     </nav>
+    </div>
     <div class="container-fluid p-3 my-3 text-center">
 
         {% block content %}
